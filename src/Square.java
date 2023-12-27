@@ -5,9 +5,11 @@ public class Square extends PApplet{
     private int xPos, yPos, number;
     private boolean mouseInSquare, selected;
     
-    public Square(int xPos, int yPos){
+    public Square(int xPos, int yPos, int number){
         mouseInSquare = false;
         selected = false;
+
+        this.number = number;
 
         this.xPos = xPos;
         this.yPos = yPos;
@@ -17,16 +19,20 @@ public class Square extends PApplet{
 
     public int getYPos(){return yPos;}
 
+    public int getNumber(){return number;}
+
+    public void setNumber(int n){number = n;}
+
     public boolean isInSquare(){return mouseInSquare;}
 
     public boolean isSelected(){return selected;}
 
     public int getColor(){
-        //return gray
-        if (mouseInSquare) return 150;
-
         //return blue
         if (selected) return color(135,206,235);
+
+        //return gray
+        if (mouseInSquare) return 150;
 
         //return white
         return 255;
@@ -39,4 +45,14 @@ public class Square extends PApplet{
     public void inSquareOn(){mouseInSquare = true;}
 
     public void inSquareOff(){mouseInSquare = false;}
+
+    public boolean equals(Square s){
+        if (s.xPos == this.xPos){
+            if (s.yPos == this.yPos){
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
