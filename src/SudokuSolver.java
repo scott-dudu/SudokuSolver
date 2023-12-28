@@ -16,7 +16,7 @@ public class SudokuSolver extends PApplet{
     Square[][] grid = new Square[SQUARES_IN_COLUMN][SQUARES_IN_ROW];
     Square[] numbers = new Square[SQUARES_IN_ROW + 1];
     Square selectedSquare;
-    int i, j, xPos, yPos;
+    int i, j;
     Solver solver = new Solver(grid);
     
     public void settings(){
@@ -65,27 +65,23 @@ public class SudokuSolver extends PApplet{
         for (i = 0; i < SQUARES_IN_ROW; i++) {
             for (j = 0; j < SQUARES_IN_COLUMN; j++){
                 Square square = grid[i][j];
-                xPos = square.getXPos();
-                yPos = square.getYPos();
-
-                //changing color while hovering over square
-                if ((mouseX > xPos && mouseX < xPos + SQUARE_WIDTH) && (mouseY > yPos && mouseY < yPos + SQUARE_WIDTH)) {
-                    square.inSquareOn();
-                } else {
-                    if (square.isInSquare()) square.inSquareOff();
-                }
+                
+                determineSquareColor(square);
 
                 //create square in grid with correct color
                 fill(square.getColor());
-                rect(xPos, yPos, SQUARE_WIDTH, SQUARE_WIDTH);
+                rect(square.getXPos(), square.getYPos(), SQUARE_WIDTH, SQUARE_WIDTH);
                 if (square.getNumber() != Square.BLANK){
                     fill(0);
-                    text(square.getNumber(), xPos + (SQUARE_WIDTH / 2), yPos + (SQUARE_WIDTH / 2));
+                    text(square.getNumber(), square.getXPos() + (SQUARE_WIDTH / 2), square.getYPos() + (SQUARE_WIDTH / 2));
                 }
             }
 
             //create number grid
             Square number = numbers[i];
+
+            determineSquareColor(number);
+
             fill(number.getColor());
             rect(number.getXPos(), number.getYPos(), SQUARE_WIDTH, SQUARE_WIDTH);
             fill(0);
@@ -101,12 +97,29 @@ public class SudokuSolver extends PApplet{
         text("Delete", deleteButton.getXPos() + (SQUARE_WIDTH / 2), deleteButton.getYPos() + (SQUARE_WIDTH / 2));
     }
 
+    private void determineSquareColor(Square s){
+        int xPos = s.getXPos();
+        int yPos = s.getYPos();
+
+        //changing color while hovering over square
+        if ((mouseX > xPos && mouseX < xPos + SQUARE_WIDTH) && (mouseY > yPos && mouseY < yPos + SQUARE_WIDTH)) {
+            s.inSquareOn();
+        } else {
+            if (s.isInSquare()) s.inSquareOff();
+        }
+    }
+
     //mouse input
     public void mouseReleased(){
 
         //activating solve and reset buttons
         if (mouseX > SOLVE_RESET_X && mouseX < SOLVE_RESET_X + SOLVE_RESET_LENGTH){
             if (mouseY > SOVLE_BUTTON_Y && mouseY < SOVLE_BUTTON_Y + SOLVE_RESET_WIDTH){
+                
+                if (selectedSquare != null) {
+                    selectedSquare.selectedOff();
+                    selectedSquare = null;
+                }
 
                 solver.solve();
             }
@@ -172,6 +185,54 @@ public class SudokuSolver extends PApplet{
             //TODO
         }
 
+        //keyboard alternative for reset button
+        if (key == 'r' || key == 'R'){
+            for (Square[] row : grid){
+                for (Square s : row){
+                    s.reset();
+                }
+            }
+
+            Solver.reset();
+            selectedSquare = null;
+        }
+
+        //keyboard alternative to mouse input
+        if ((key == 'w' || key == 'W')
+         || (key == 'a' || key == 'A')
+         || (key == 's' || key == 'S')
+         || (key == 'd' || key == 'D')
+         || key == CODED){
+
+            //initialize
+            if (selectedSquare == null) {
+                selectedSquare = grid[0][0];
+                selectedSquare.selectedOn();
+                return;
+            }
+
+            //calculate location on grid
+            int row = (selectedSquare.getXPos() - SQUARE_START_POS) / SQUARE_WIDTH;
+            int col = (selectedSquare.getYPos() - SQUARE_START_POS) / SQUARE_WIDTH;
+
+            selectedSquare.selectedOff();
+
+            if (key == 'w' || key == 'W' || keyCode == UP) col -= 1;
+            if (key == 'a' || key == 'A' || keyCode == LEFT) row -= 1;
+            if (key == 's' || key == 'S' || keyCode == DOWN) col += 1;
+            if (key == 'd' || key == 'D' || keyCode == RIGHT) row += 1;
+
+            //prevents out of bounds
+            if (col > 8) col = 0;
+            if (col < 0) col = 8;
+            if (row > 8) row = 0;
+            if (row < 0) row = 8;
+
+            selectedSquare = grid[row][col];
+            selectedSquare.selectedOn();
+
+         }
+
         //keyboard alternative for numbers
         if (selectedSquare != null){
 
@@ -184,6 +245,8 @@ public class SudokuSolver extends PApplet{
             else if (key == '7' || key == '&') selectedSquare.setNumber(7);
             else if (key == '8' || key == '*') selectedSquare.setNumber(8);
             else if (key == '9' || key == '(') selectedSquare.setNumber(9);
+
+            //keyboard alternative for delete button
             else if (key == BACKSPACE) selectedSquare.setNumber(Square.BLANK);
 
         }
