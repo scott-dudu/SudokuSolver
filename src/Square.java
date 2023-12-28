@@ -1,13 +1,16 @@
 
+import java.util.HashSet;
+
 import processing.core.PApplet;
 
 public class Square extends PApplet{
     private int xPos, yPos, number;
     private boolean mouseInSquare, selected;
+    private HashSet<Integer> possibleNums;
+    static final int BLANK = -1;
     
     public Square(int xPos, int yPos, int number){
-        mouseInSquare = false;
-        selected = false;
+        reset();
 
         this.number = number;
 
@@ -54,5 +57,28 @@ public class Square extends PApplet{
         }
 
         return false;
+    }
+
+    public void addPossibleNum(int n){possibleNums.add(n);}
+
+    public void removePossibleNum(int n){
+        if (possibleNums.contains(n)) possibleNums.remove(n);
+    }
+
+    public void clearPossibleNums(){possibleNums.clear();}
+
+    public HashSet<Integer> getPossibleNums(){return possibleNums;}
+
+    public void initialize(){
+        for(int i = 1; i <= 9; i++){
+            addPossibleNum(i);
+        }
+    }
+
+    public void reset(){
+        selectedOff();
+        inSquareOff();
+        possibleNums = new HashSet<>();
+        number = BLANK;
     }
 }
