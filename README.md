@@ -22,7 +22,7 @@ The program is coded to solve the problem like how a person would solve it. The 
 
  5. begins guessing when there is no clear choice, in any box, from step 3 or 4.
 
-Due to the human-like process the program takes, when given a illegitinate sudoku puzzle, the program starts guessing every possible outcome the program can take, increasing the time it takes to solve the given puzzle.
+Due to the human-like process the program takes, when given an illegitinate sudoku puzzle, the program starts guessing every possible outcome the program can take, increasing the time it takes to solve the given puzzle.
 
 ## Further improvement
 
