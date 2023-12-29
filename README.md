@@ -8,7 +8,7 @@ Sudoku is a game with a 9x9 grid. The grid is also split into nine 3x3 grids. Th
 
 ## How the Solver works
 
-This program relies on Papplet which requires "core.jar". The program is coded to have the user input the problem into the board either by using the mouse or keyboard. Once the user is done, they can hit solve for the program to begin.
+This program relies on PApplet which requires "core.jar". The program is coded to have the user input the problem into the board either by using the mouse or keyboard. Once the user is done, they can hit solve for the program to begin.
 
 The program is coded to solve the problem like how a person would solve it. The program:
 
