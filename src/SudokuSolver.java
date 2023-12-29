@@ -121,7 +121,11 @@ public class SudokuSolver extends PApplet{
                     selectedSquare = null;
                 }
 
-                solver.solve();
+                Square[][] temp = solver.solve();
+                if (temp != null) grid = temp;
+                else {
+                    //TODO: edge case for when a puzzle is not solvable
+                }
             }
 
             //clear board
@@ -132,11 +136,12 @@ public class SudokuSolver extends PApplet{
                     }
                 }
 
-                Solver.reset();
+                solver.reset();
                 selectedSquare = null;
             }
         }
 
+        //delete button
         Square s = numbers[numbers.length - 1];
         if (mouseX > s.getXPos() && mouseX < s.getXPos() + SQUARE_WIDTH){
             if (mouseY > s.getYPos() && mouseY < s.getYPos() + SQUARE_WIDTH){
@@ -182,7 +187,16 @@ public class SudokuSolver extends PApplet{
         //keyboard alternative for solve button
         if (key == ENTER) {
             System.out.println("hit enter key");
-            //TODO
+            if (selectedSquare != null) {
+                selectedSquare.selectedOff();
+                selectedSquare = null;
+            }
+
+            Square[][] temp = solver.solve();
+            if (temp != null) grid = temp;
+            else {
+                //TODO: edge case for when a puzzle is not solvable
+            }
         }
 
         //keyboard alternative for reset button
@@ -193,7 +207,7 @@ public class SudokuSolver extends PApplet{
                 }
             }
 
-            Solver.reset();
+            solver.reset();
             selectedSquare = null;
         }
 

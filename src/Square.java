@@ -24,7 +24,10 @@ public class Square extends PApplet{
 
     public int getNumber(){return number;}
 
-    public void setNumber(int n){number = n;}
+    public void setNumber(int n){
+        number = n;
+        possibleNums.clear();
+    }
 
     public boolean isInSquare(){return mouseInSquare;}
 

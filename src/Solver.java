@@ -4,11 +4,13 @@ import java.util.Iterator;
 
 public class Solver {
     private Square[][] grid;
-    private static boolean firstCheck;
+    private boolean firstCheck;
+    private boolean stuck;
 
     public Solver(Square[][] grid){
         this.grid = grid;
         firstCheck = false;
+        stuck = true;
     }
 
     public boolean isSolved(){
@@ -31,15 +33,24 @@ public class Solver {
         return true;
     }
 
-    public void solve(){
-        if (isSolved()) return;
+    public Square[][] solve(){
+        while (!isSolved()) {
+            stuck = true;
 
-        scan();
-        firstCheck = true;
-        solve();
+            if (!scan()) return null;
+
+            if (firstCheck && stuck){
+                if (!guess(grid)) return null;
+            }
+
+            firstCheck = true;
+
+        }
+
+        return grid;
     }
 
-    private void scan(){
+    private boolean scan(){
         int i, j;
 
         //loop through the board
@@ -54,19 +65,26 @@ public class Solver {
                     s.initialize();
                     scanByLines(s, i, j);
                     scanBySquare(s, i, j);
+
+                    //immediately exits when the puzzle is impossible to solve
+                    //second check if square is blank due to processOfElimination ability to insert num
+                    if (s.getNumber() == Square.BLANK && s.getPossibleNums().isEmpty()) return false;
                     
                     //if there is only one possible num, insert the num
                     if (s.getPossibleNums().size() == 1){
                         Iterator<Integer> it = s.getPossibleNums().iterator();
                         int num = it.next();
                         s.setNumber(num);
-                        s.removePossibleNum(num);
-                        removeNum(num, i, j);
+                        removeNum(grid, num, i, j);
+
+                        stuck = false;
                     }
                 }
 
             }
         }
+
+        return true;
     }
 
     private void scanByLines(Square s, int row, int col){
@@ -135,9 +153,6 @@ public class Solver {
             }
         }
 
-        //remove after done: to check code
-        System.out.println(row + " " + col + " : " + s.getPossibleNums());
-
         if (firstCheck) processOfElimination(s, blankSquares, row, col);
     }
 
@@ -157,8 +172,10 @@ public class Solver {
             if (!nums.contains(i)){
 
                 s.setNumber(i);
-                s.clearPossibleNums();
-                removeNum(i, row, col);
+                removeNum(grid, i, row, col);
+
+                stuck = false;
+
                 return true;
 
             }
@@ -167,12 +184,12 @@ public class Solver {
         return false;
     }
 
-    private void removeNum(int n, int row, int col){
+    private void removeNum(Square[][] gridSquares, int n, int row, int col){
         int i, j;
 
         for (i = 0; i < SudokuSolver.SQUARES_IN_COLUMN; i++){
-            if (grid[row][i].getNumber() == Square.BLANK) grid[row][i].removePossibleNum(n);
-            if (grid[i][col].getNumber() == Square.BLANK) grid[i][col].removePossibleNum(n);
+            if (gridSquares[row][i].getNumber() == Square.BLANK) gridSquares[row][i].removePossibleNum(n);
+            if (gridSquares[i][col].getNumber() == Square.BLANK) gridSquares[i][col].removePossibleNum(n);
         }
 
         int squareRow = (row / 3) * 3;
@@ -180,13 +197,64 @@ public class Solver {
         for (i = squareRow; i < squareRow + 3; i++){
             for (j = squareCol; j < squareCol + 3; j++){
 
-                if (grid[i][j].getNumber() == Square.BLANK) grid[i][j].removePossibleNum(n);
+                if (gridSquares[i][j].getNumber() == Square.BLANK) gridSquares[i][j].removePossibleNum(n);
 
             }
         }
     }
 
-    //TODO: implement guessing feature for when there are no clear choices.
+    private boolean guess(Square[][] gridSquares){
+        Square s = findNextEmptySquare(gridSquares);
 
-    public static void reset(){firstCheck = false;}
+        HashSet<Integer> possibleNums = s.getPossibleNums();
+        Iterator<Integer> it = possibleNums.iterator();
+
+        int row = (s.getXPos() - SudokuSolver.SQUARE_START_POS) / SudokuSolver.SQUARE_WIDTH;
+        int col = (s.getYPos() - SudokuSolver.SQUARE_START_POS) / SudokuSolver.SQUARE_WIDTH;
+        int num;
+        while (it.hasNext()){
+            Square[][] temp = copy(grid);
+
+            num = it.next();
+            temp[row][col].setNumber(num);
+
+            Solver solver = new Solver(temp);
+            
+            if (solver.solve() != null) {
+                grid = temp;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Square findNextEmptySquare(Square[][] gridSquares){
+        for (int i = 0; i < SudokuSolver.SQUARES_IN_COLUMN; i++){
+            for (int j = 0; j < SudokuSolver.SQUARES_IN_ROW; j++){
+
+                if (gridSquares[i][j].getNumber() == Square.BLANK) return gridSquares[i][j];
+
+            }
+        }
+
+        return null;
+    }
+
+    private Square[][] copy(Square[][] gridSquares){
+        Square[][] temp =  new Square[gridSquares.length][gridSquares[0].length];
+
+        for (int i = 0; i < temp.length; i++){
+            for (int j = 0; j <temp[0].length; j++){
+                Square old = gridSquares[i][j];
+
+                Square newSquare = new Square(old.getXPos(), old.getYPos(), old.getNumber());
+                temp[i][j] = newSquare;
+            }
+        }
+
+        return temp;
+    }
+
+    public void reset(){firstCheck = false;}
 }
