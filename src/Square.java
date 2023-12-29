@@ -4,15 +4,16 @@ import java.util.HashSet;
 import processing.core.PApplet;
 
 public class Square extends PApplet{
-    private int xPos, yPos, number;
+    private int xPos, yPos, number, textColor;
     private boolean mouseInSquare, selected;
     private HashSet<Integer> possibleNums;
     static final int BLANK = -1;
     
-    public Square(int xPos, int yPos, int number){
+    public Square(int xPos, int yPos, int number, int textColor){
         reset();
 
         this.number = number;
+        this.textColor = textColor;
 
         this.xPos = xPos;
         this.yPos = yPos;
@@ -33,7 +34,7 @@ public class Square extends PApplet{
 
     public boolean isSelected(){return selected;}
 
-    public int getColor(){
+    public int getSquareColor(){
         //return blue
         if (selected) return color(135,206,235);
 
@@ -51,6 +52,10 @@ public class Square extends PApplet{
     public void inSquareOn(){mouseInSquare = true;}
 
     public void inSquareOff(){mouseInSquare = false;}
+
+    public void setTextColor(int r, int g, int b){textColor = color(r, g, b);}
+
+    public int getTextColor(){return textColor;}
 
     public boolean equals(Square s){
         if (s.xPos == this.xPos){
@@ -83,5 +88,6 @@ public class Square extends PApplet{
         inSquareOff();
         possibleNums = new HashSet<>();
         number = BLANK;
+        textColor = 0;
     }
 }

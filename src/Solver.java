@@ -13,7 +13,7 @@ public class Solver {
         stuck = true;
     }
 
-    public boolean isSolved(){
+    private boolean isSolved(){
         for (Square[] row : grid){
             for (Square s : row){
                 if (s.getNumber() == Square.BLANK) return false;
@@ -23,7 +23,7 @@ public class Solver {
         return true;
     }
 
-    public boolean isBlank(){
+    private boolean isBlank(){
         for (Square[] row : grid){
             for (Square s : row){
                 if (s.getNumber() != Square.BLANK) return false;
@@ -33,8 +33,57 @@ public class Solver {
         return true;
     }
 
+    private boolean isValid(){
+        int row, col;
+
+        for (row = 0; row < SudokuSolver.SQUARES_IN_COLUMN; row++){
+            for (col = 0; col < SudokuSolver.SQUARES_IN_ROW; col++){
+                Square s = grid[row][col];
+                
+                if (s.getNumber() != Square.BLANK){
+                    if (invalidByLines(s, row, col) || invalidBySquare(s, row, col)) return false;
+                }
+
+            }
+        }
+
+
+        return true;
+    }
+
+    private boolean invalidByLines(Square s, int row, int col){
+        int num = s.getNumber();
+
+        for (int i = 0; i < SudokuSolver.SQUARES_IN_COLUMN; i++){
+            
+            if (!grid[row][i].equals(s) && grid[row][i].getNumber() == num) return true;
+            if (!grid[i][col].equals(s) && grid[i][col].getNumber() == num) return true;
+
+        }
+
+        return false;
+    }
+
+    private boolean invalidBySquare(Square s, int row, int col){
+        int squareRow = (row / 3) * 3;
+        int squareCol = (col / 3) * 3;
+        int num = s.getNumber();
+
+        for (int i = squareRow; i < squareRow + 3; i++){
+            for (int j = squareCol; j < squareCol + 3; j++){
+
+                if (!grid[i][j].equals(s) && grid[i][j].getNumber() == num) return true;
+
+            }
+        }
+
+        return false;
+    }
+
     public Square[][] solve(){
         while (!isSolved()) {
+            if (isBlank() || !isValid()) return null;
+
             stuck = true;
 
             if (!scan()) return null;
@@ -75,6 +124,7 @@ public class Solver {
                         Iterator<Integer> it = s.getPossibleNums().iterator();
                         int num = it.next();
                         s.setNumber(num);
+                        s.setTextColor(255, 0, 0);
                         removeNum(grid, num, i, j);
 
                         stuck = false;
@@ -172,6 +222,7 @@ public class Solver {
             if (!nums.contains(i)){
 
                 s.setNumber(i);
+                s.setTextColor(255, 0, 0);
                 removeNum(grid, i, row, col);
 
                 stuck = false;
@@ -217,6 +268,8 @@ public class Solver {
 
             num = it.next();
             temp[row][col].setNumber(num);
+            temp[row][col].setTextColor(255, 0, 0);
+            removeNum(temp, num, row, col);
 
             Solver solver = new Solver(temp);
             
@@ -248,7 +301,7 @@ public class Solver {
             for (int j = 0; j <temp[0].length; j++){
                 Square old = gridSquares[i][j];
 
-                Square newSquare = new Square(old.getXPos(), old.getYPos(), old.getNumber());
+                Square newSquare = new Square(old.getXPos(), old.getYPos(), old.getNumber(), old.getTextColor());
                 temp[i][j] = newSquare;
             }
         }

@@ -10,8 +10,14 @@ public class SudokuSolver extends PApplet{
     final int SOLVE_RESET_X = 615;
     final int SOLVE_RESET_LENGTH = 160;
     final int SOLVE_RESET_WIDTH = 50;
-    final int SOVLE_BUTTON_Y = 250;
-    final int RESET_BUTTON_Y = 350;
+    final int SOVLE_BUTTON_Y = 200;
+    final int RESET_BUTTON_Y = 300;
+
+    int STAGE;
+    String msg;
+    final int SUCCESS = -1;
+    final int INVALID = -2;
+    final int PENDING = -3;
 
     Square[][] grid = new Square[SQUARES_IN_COLUMN][SQUARES_IN_ROW];
     Square[] numbers = new Square[SQUARES_IN_ROW + 1];
@@ -26,18 +32,19 @@ public class SudokuSolver extends PApplet{
 
             //create sudoku grid
             for (j = 0; j < SQUARES_IN_COLUMN; j++){
-                selectedSquare = new Square(SQUARE_START_POS + (SQUARE_WIDTH * i), SQUARE_START_POS + (SQUARE_WIDTH * j), Square.BLANK);
+                selectedSquare = new Square(SQUARE_START_POS + (SQUARE_WIDTH * i), SQUARE_START_POS + (SQUARE_WIDTH * j), Square.BLANK, 0);
                 grid[i][j] = selectedSquare;
             }
 
             //create number grid
-            selectedSquare = new Square(SQUARE_START_POS + (SQUARE_WIDTH * i), SQUARE_START_POS + ((SQUARES_IN_COLUMN + 1) * SQUARE_WIDTH), i + 1);
+            selectedSquare = new Square(SQUARE_START_POS + (SQUARE_WIDTH * i), SQUARE_START_POS + ((SQUARES_IN_COLUMN + 1) * SQUARE_WIDTH), i + 1, 0);
             numbers[i] = selectedSquare;
         }
 
-        numbers[numbers.length - 1] = new Square(SQUARE_START_POS + (SQUARE_WIDTH * SQUARES_IN_ROW), SQUARE_START_POS + ((SQUARES_IN_COLUMN + 1) * SQUARE_WIDTH), Square.BLANK);
+        numbers[numbers.length - 1] = new Square(SQUARE_START_POS + (SQUARE_WIDTH * SQUARES_IN_ROW), SQUARE_START_POS + ((SQUARES_IN_COLUMN + 1) * SQUARE_WIDTH), Square.BLANK, 0);
 
         selectedSquare = null;
+        STAGE = PENDING;
     }
 
     public void draw(){
@@ -54,12 +61,40 @@ public class SudokuSolver extends PApplet{
 
         //standard text style
         textAlign(CENTER, CENTER);
+
+        //text for alternative options
+        textSize(15);
+        text("\'or press ENTER\'", 695, 265);
+        text("\'or press R\'", 695, 365);
+        text("\'or use WASD, arrow keys, BACKSPACE, and number keys\'", 325, 730);
+
+        //instructions
+        text("This is a program that\ncan solve sudoku puzzles.\nPlease input a sudoku\nproblem and press solve.\n(note that it will take\nlonger to solve with less\nsquares filled in)", 695, 480);
+
+        //bigger texts
         textSize(25);
 
         //text for buttons
         fill(0);
-        text("Solve", 695, 275);
-        text("Reset", 695, 375);
+        text("Solve", 695, 225);
+        text("Reset", 695, 325);
+
+        //title
+        fill(255);
+        text("Scott's\nSudoku Solver", 695, 125);
+
+        //Success or invalid message
+        if (STAGE == PENDING) msg = "";
+        if (STAGE == SUCCESS){
+            msg = "Success!";
+            fill(color(0, 255, 0));
+        }
+        if (STAGE == INVALID){
+            msg = "Invalid Puzzle";
+            fill(color(255, 0, 0));
+        }
+
+        text(msg, 695, 600);
 
         //create grid
         for (i = 0; i < SQUARES_IN_ROW; i++) {
@@ -69,10 +104,10 @@ public class SudokuSolver extends PApplet{
                 determineSquareColor(square);
 
                 //create square in grid with correct color
-                fill(square.getColor());
+                fill(square.getSquareColor());
                 rect(square.getXPos(), square.getYPos(), SQUARE_WIDTH, SQUARE_WIDTH);
                 if (square.getNumber() != Square.BLANK){
-                    fill(0);
+                    fill(square.getTextColor());
                     text(square.getNumber(), square.getXPos() + (SQUARE_WIDTH / 2), square.getYPos() + (SQUARE_WIDTH / 2));
                 }
             }
@@ -82,9 +117,9 @@ public class SudokuSolver extends PApplet{
 
             determineSquareColor(number);
 
-            fill(number.getColor());
+            fill(number.getSquareColor());
             rect(number.getXPos(), number.getYPos(), SQUARE_WIDTH, SQUARE_WIDTH);
-            fill(0);
+            fill(number.getTextColor());
             text(number.getNumber(), number.getXPos() + (SQUARE_WIDTH / 2), number.getYPos() + (SQUARE_WIDTH / 2));
         }
         
@@ -122,9 +157,12 @@ public class SudokuSolver extends PApplet{
                 }
 
                 Square[][] temp = solver.solve();
-                if (temp != null) grid = temp;
+                if (temp != null){
+                    grid = temp;
+                    STAGE = SUCCESS;
+                }
                 else {
-                    //TODO: edge case for when a puzzle is not solvable
+                    STAGE = INVALID;
                 }
             }
 
@@ -138,6 +176,7 @@ public class SudokuSolver extends PApplet{
 
                 solver.reset();
                 selectedSquare = null;
+                STAGE = PENDING;
             }
         }
 
@@ -168,6 +207,8 @@ public class SudokuSolver extends PApplet{
                     if (selectedSquare != null) selectedSquare.selectedOff();
                     selectedSquare = square;
                 }
+
+                STAGE = PENDING;
             }
 
             //select square on number grid to input into selectedSquare
@@ -186,16 +227,18 @@ public class SudokuSolver extends PApplet{
 
         //keyboard alternative for solve button
         if (key == ENTER) {
-            System.out.println("hit enter key");
             if (selectedSquare != null) {
                 selectedSquare.selectedOff();
                 selectedSquare = null;
             }
 
             Square[][] temp = solver.solve();
-            if (temp != null) grid = temp;
+            if (temp != null) {
+                grid = temp;
+                STAGE = SUCCESS;
+            }
             else {
-                //TODO: edge case for when a puzzle is not solvable
+                STAGE = INVALID;
             }
         }
 
@@ -209,6 +252,7 @@ public class SudokuSolver extends PApplet{
 
             solver.reset();
             selectedSquare = null;
+            STAGE = PENDING;
         }
 
         //keyboard alternative to mouse input
@@ -244,6 +288,7 @@ public class SudokuSolver extends PApplet{
 
             selectedSquare = grid[row][col];
             selectedSquare.selectedOn();
+            STAGE = PENDING;
 
          }
 
