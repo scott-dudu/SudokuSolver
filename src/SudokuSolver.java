@@ -1,5 +1,6 @@
 
 import processing.core.PApplet;
+import processing.core.PFont;
 
 public class SudokuSolver extends PApplet{
     static final int SQUARES_IN_ROW = 9;
@@ -60,6 +61,7 @@ public class SudokuSolver extends PApplet{
         rect(SOLVE_RESET_X, RESET_BUTTON_Y, SOLVE_RESET_LENGTH, SOLVE_RESET_WIDTH);
 
         //standard text style
+        textFont(createFont("Impact", 25));
         textAlign(CENTER, CENTER);
 
         //text for alternative options
@@ -96,7 +98,7 @@ public class SudokuSolver extends PApplet{
 
         text(msg, 695, 600);
 
-        //create grid
+        //draw grid
         for (i = 0; i < SQUARES_IN_ROW; i++) {
             for (j = 0; j < SQUARES_IN_COLUMN; j++){
                 Square square = grid[i][j];
@@ -112,7 +114,7 @@ public class SudokuSolver extends PApplet{
                 }
             }
 
-            //create number grid
+            //draw number grid
             Square number = numbers[i];
 
             determineSquareColor(number);
@@ -122,6 +124,14 @@ public class SudokuSolver extends PApplet{
             fill(number.getTextColor());
             text(number.getNumber(), number.getXPos() + (SQUARE_WIDTH / 2), number.getYPos() + (SQUARE_WIDTH / 2));
         }
+
+        //lines to differentiate 3x3 grids
+        strokeWeight(5);
+        line(410, 50, 410, 590);
+        line(230, 50, 230, 590);
+        line(50, 410, 590, 410);
+        line(50, 230, 590, 230);
+        strokeWeight(1);
         
         //delete Button
         Square deleteButton = numbers[numbers.length - 1];
