@@ -1,6 +1,5 @@
 
 import processing.core.PApplet;
-import processing.core.PFont;
 
 public class SudokuSolver extends PApplet{
     static final int SQUARES_IN_ROW = 9;
